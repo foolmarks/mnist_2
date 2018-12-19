@@ -1,2 +1,2 @@
 # mnist_2
-MNIST digits example uisng dataset from tensorflow.examples.tutorials.mnist
+MNIST digits example using dataset from tensorflow.examples.tutorials.mnist
