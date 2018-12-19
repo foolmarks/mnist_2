@@ -81,23 +81,24 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 # Initialize the variables
 init = tf.initializers.global_variables()
 
-
 # Launch the graph
 with tf.Session() as sess:
     sess.run(init)
 
     # Training cycle
     for step in range(steps):
-        batch_x, batch_y = mnist.train.next_batch(batch_size)
+        batch = mnist.train.next_batch(batch_size)
 
-        # Run optimization and loss
-        _, ls, acc = sess.run([optimizer, loss, accuracy], feed_dict={x: batch_x, y: batch_y})
+        train_accuracy = sess.run(accuracy, feed_dict={x: batch[0], y: batch[1]})
         if step % 100 == 0:
-            print("Train step: {stp} -  Training accuracy: {acc}" .format(stp=step, acc=acc))
+            print("Train step: {stp} -  Training accuracy: {acc}" .format(stp=step, acc=train_accuracy))
+
+        # executing the optimizer is the actual training
+        sess.run([optimizer], feed_dict={x: batch[0], y: batch[1]})
 
     print("Training Finished!")
 
     # Evaluation
-    print ("Final Accuracy with test set:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
+    print ("Final Accuracy with test set:", sess.run(accuracy, feed_dict={x: mnist.test.images, y: mnist.test.labels}))
 
 print ("FINISHED!")
