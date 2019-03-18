@@ -65,15 +65,15 @@ x = tf.placeholder(tf.float32, shape=[None, 784])
 y = tf.placeholder(tf.float32, [None, 10])
 
 
-# The fully connected network model
-#  - dense, fully-connected layer of 196 nodes, reLu activation
-#  - dense, fully-connected layer of 10 nodes, softmax activation
-input_layer = tf.layers.dense(inputs=x, kernel_initializer=tf.glorot_uniform_initializer(), units=196, activation=tf.nn.relu)
-prediction = tf.layers.dense(inputs=input_layer, kernel_initializer=tf.glorot_uniform_initializer(), units=10, activation=tf.nn.softmax)
+# MLP definition
+input_layer = tf.layers.dense(inputs=x, units=784, activation=tf.nn.relu)
+hidden_layer1 = tf.layers.dense(inputs=input_layer, units=196, activation=tf.nn.relu)
+hidden_layer2 = tf.layers.dense(inputs=hidden_layer1, units=10, activation=None)
+prediction = tf.nn.softmax(hidden_layer2)
 
 
 # Define a cross entropy loss function
-loss = tf.reduce_mean(tf.losses.softmax_cross_entropy(logits=prediction, onehot_labels=y))
+loss = tf.reduce_mean(tf.losses.softmax_cross_entropy(logits=hidden_layer2, onehot_labels=y))
 
 # Define the optimizer function
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
@@ -105,17 +105,19 @@ with tf.Session() as sess:
 
     # Training cycle
     for step in range(steps):
-        batch = mnist.train.next_batch(batch_size)
 
-        train_accuracy = sess.run(accuracy, feed_dict={x: batch[0], y: batch[1]})
+        # fetch a batch
+        batch = mnist.train.next_batch(batch_size)
 
         # display training accuracy every 100 batches
         if step % 100 == 0:
-            print("Train step: {stp} -  Training accuracy: {acc}" .format(stp=step, acc=train_accuracy))
+            train_accuracy = sess.run(accuracy, feed_dict={x: batch[0], y: batch[1]})
+            print ("Train Step:", step, ' Training Accuracy: ', train_accuracy)
 
         # executing the optimizer is the actual training
         _, s = sess.run([optimizer,tb_summary], feed_dict={x: batch[0], y: batch[1]})
         writer.add_summary(s, step)
+
 
     print("Training Finished!")
 
@@ -124,3 +126,4 @@ with tf.Session() as sess:
 
 
 print ("FINISHED! Run tensorboard with: tensorboard --host localhost --port 6006 --logdir=./tb_log")
+
